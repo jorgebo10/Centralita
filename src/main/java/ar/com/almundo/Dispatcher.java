@@ -1,5 +1,6 @@
 package ar.com.almundo;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
@@ -30,20 +31,28 @@ class Dispatcher {
     }
 
     private void handleCallToEmployee(final Call call, final Employee employee) {
+        logger.log(Level.INFO, Thread.currentThread().getName() + " => " + employee.toString());
+
         employee.assignCall(call);
+
 
         //employee.sayHello('Hello')
         logger.log(Level.INFO, "Employee starting conversation with client...:)");
 
         //String response = employee.waitForResponse()
-        logger.log(Level.INFO, "Employee waiting for response from client...:|");
+        logger.log(Level.INFO, " Employee waiting for response from client...:|");
 
-        randomDelay(2, 5);
+        randomDelay(5, 10);
 
         //employee.sayGoodbye("Bye")
         logger.log(Level.INFO, "Employee stopping conversation with client...:(!");
-
+        try {
+            call.getSocket().close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         availableEmployeesQueue.add(employee);
+        logger.log(Level.INFO, Thread.currentThread().getName() + " <= " + employee.toString());
     }
 
     private void randomDelay(float min, float max) {
