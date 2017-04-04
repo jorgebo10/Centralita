@@ -29,6 +29,10 @@ public class Employee implements Comparable<Employee> {
         return new Employee(name, id, EmployeeType.SUPERVISOR);
     }
 
+    public Call getCall() {
+        return call;
+    }
+
     public Long getId() {
         return id;
     }

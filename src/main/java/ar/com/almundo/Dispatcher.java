@@ -3,12 +3,13 @@ package ar.com.almundo;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,58 +18,75 @@ import net.jcip.annotations.ThreadSafe;
 @ThreadSafe
 class Dispatcher {
 
-    private static final long TEN_SECONDS = 10000000000L;
+    private static final long TEN_SECONDS = 10L;
 
     private final Queue<Employee> availableEmployeesQueue;
     private final ExecutorService executorService;
+    private final ScheduledExecutorService timeoutService;
     private final static Logger logger = Logger.getLogger(Dispatcher.class.getName());
 
     public Dispatcher(final Queue<Employee> queue, final ExecutorService executorService) {
         this.availableEmployeesQueue = new PriorityBlockingQueue<>(queue);
         this.executorService = executorService;
+        this.timeoutService = Executors.newSingleThreadScheduledExecutor();
     }
 
     public void dispatchCall(final Call call) {
-        final Optional<Employee> employee = Optional.ofNullable(this.availableEmployeesQueue.poll());
+        final Optional<Employee> employee = getNextAvailableEmployee();
 
         if (employee.isPresent()) {
-            long endNanos = System.nanoTime() + TEN_SECONDS;
-            final Future<Employee> future = this.executorService.submit(() -> handleCallToEmployee(call, employee.get()));
-            long timeLeft = endNanos - System.nanoTime();
-            try {
-                future.get(timeLeft, TimeUnit.NANOSECONDS);
-            } catch (InterruptedException | ExecutionException e) {
-                logger.log(Level.SEVERE, "Execution exception", e);
-            } catch (final TimeoutException e) {
-                future.cancel(true);
-                logger.log(Level.WARNING, "Call exceded maximum allow timeout", e);
-            } finally {
-                availableEmployeesQueue.add(employee.get());
-            }
+            handleCallToEmployee(call, employee.get());
         } else {
             handleNoEmployeesAvailable();
         }
     }
 
-    private Employee handleCallToEmployee(final Call call, final Employee employee) throws IOException {
-        logger.log(Level.INFO, Thread.currentThread().getName() + " => " + employee.toString());
+    private Future<Employee> handleCallToEmployee(final Call call, final Employee employee) {
+        final Future future = this.executorService.submit((Callable<Void>) () -> {
+            dispatchCallToEmployee(call, employee);
+            return null;
+        });
+        this.timeoutService.schedule((Callable<Void>) () -> {
+            restoreEmployeeOnTimeout(employee, future);
+            return null;
+        }, TEN_SECONDS, TimeUnit.SECONDS);
+        return future;
+    }
 
+    private void restoreEmployeeOnTimeout(Employee employee, Future future) {
+        future.cancel(true);
+        addAvailableEmployee(employee);
+    }
+
+    private Optional<Employee> getNextAvailableEmployee() {
+        return Optional.ofNullable(this.availableEmployeesQueue.poll());
+    }
+
+    private void addAvailableEmployee(final Employee employee) {
+        availableEmployeesQueue.add(employee);
+    }
+
+    private void dispatchCallToEmployee(final Call call, final Employee employee) {
         employee.assignCall(call);
 
-        //employee.sayHello('Hello')
+        logger.log(Level.INFO, Thread.currentThread().getName() + " => " + employee.toString());
+
         logger.log(Level.INFO, "Employee starting conversation with client...:)");
 
-        //String response = employee.waitForResponse()
         logger.log(Level.INFO, "Employee waiting for response from client...:|");
 
         randomDelay(5, 11);
 
-        //employee.sayGoodbye("Bye")
         logger.log(Level.INFO, "Employee stopping conversation with client...:(!");
-        call.getSocket().close();
-        logger.log(Level.INFO, Thread.currentThread().getName() + " <= " + employee.toString());
 
-        return employee;
+        try {
+            call.getSocket().close();
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Could not close socket");
+        } finally {
+            logger.log(Level.INFO, Thread.currentThread().getName() + " <= " + employee.toString());
+            addAvailableEmployee(employee);
+        }
     }
 
     private void randomDelay(float min, float max) {
