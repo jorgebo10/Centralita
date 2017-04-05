@@ -72,7 +72,9 @@ public class LifecycleWebServer {
         // clients and would otherwise be vulnerable to overload.
         //TODO: pass thread limit as a parameter
         final ExecutorService executorService = Executors.newFixedThreadPool(10);
-        final Dispatcher dispatcher = new Dispatcher(getAvailableEmployees(), executorService);
+        final SelectEmployeeStrategy selectEmployeeStrategy =
+                new SelectEmployeeByPriorityStrategy(getAvailableEmployees());
+        final Dispatcher dispatcher = new Dispatcher(selectEmployeeStrategy, executorService);
         new LifecycleWebServer(dispatcher, executorService).start();
     }
 }

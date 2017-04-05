@@ -2,12 +2,10 @@ package ar.com.almundo;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -20,19 +18,19 @@ class Dispatcher {
 
     private static final long TEN_SECONDS = 10L;
 
-    private final Queue<Employee> availableEmployeesQueue;
+    private final SelectEmployeeStrategy selectEmployeeStrategy;
     private final ExecutorService executorService;
     private final ScheduledExecutorService timeoutService;
     private final static Logger logger = Logger.getLogger(Dispatcher.class.getName());
 
-    public Dispatcher(final Queue<Employee> employees, final ExecutorService executorService) {
-        this.availableEmployeesQueue = new PriorityBlockingQueue<>(employees);
+    public Dispatcher(final SelectEmployeeStrategy selectEmployeeStrategy, final ExecutorService executorService) {
+        this.selectEmployeeStrategy = selectEmployeeStrategy;
         this.executorService = executorService;
         this.timeoutService = Executors.newSingleThreadScheduledExecutor();
     }
 
     public Optional<Future<Employee>> dispatchCall(final Call call) {
-        final Optional<Employee> employee = getNextAvailableEmployee();
+        final Optional<Employee> employee = selectEmployeeStrategy.getNextSelectableEmployee();
 
         if (employee.isPresent()) {
             return Optional.of(handleCallToEmployee(call, employee.get()));
@@ -56,16 +54,9 @@ class Dispatcher {
 
     private void restoreEmployeeOnTimeout(Employee employee, Future future) {
         future.cancel(true);
-        addAvailableEmployee(employee);
+        selectEmployeeStrategy.addSelectableEmployee(employee);
     }
 
-    private Optional<Employee> getNextAvailableEmployee() {
-        return Optional.ofNullable(this.availableEmployeesQueue.poll());
-    }
-
-    private void addAvailableEmployee(final Employee employee) {
-        availableEmployeesQueue.add(employee);
-    }
 
     private void dispatchCallToEmployee(final Call call, final Employee employee) {
         employee.assignCall(call);
@@ -86,7 +77,7 @@ class Dispatcher {
             logger.log(Level.SEVERE, "Could not close socket");
         } finally {
             logger.log(Level.INFO, Thread.currentThread().getName() + " <= " + employee.toString());
-            addAvailableEmployee(employee);
+            selectEmployeeStrategy.addSelectableEmployee(employee);
         }
     }
 
