@@ -67,6 +67,10 @@ public class LifecycleWebServer {
     }
 
     public static void main(final String[] args) throws IOException {
+        //let's limit the number of concurrent tasks for resource-management purposes,
+        // as in a server application that accepts requests from network
+        // clients and would otherwise be vulnerable to overload.
+        //TODO: pass thread limit as a parameter
         final ExecutorService executorService = Executors.newFixedThreadPool(10);
         final Dispatcher dispatcher = new Dispatcher(getAvailableEmployees(), executorService);
         new LifecycleWebServer(dispatcher, executorService).start();
