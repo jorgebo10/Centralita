@@ -1,5 +1,11 @@
-package ar.com.almundo
+package ar.com.almundo.test.integration
 
+import ar.com.almundo.test.integration.call.Employee
+import ar.com.almundo.test.integration.call.dispatcher.Call
+import ar.com.almundo.test.integration.call.dispatcher.Dispatcher
+import ar.com.almundo.test.integration.call.dispatcher.SelectEmployeeByPriorityStrategy
+import ar.com.almundo.test.integration.call.dispatcher.SelectEmployeeStrategy
+import ar.com.almundo.test.integration.server.NoDuplicatesPriorityQueue
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
@@ -8,7 +14,9 @@ import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.ScheduledExecutorService
 
-import static ar.com.almundo.Employee.*
+import static Employee.newDirector
+import static Employee.newOperario
+import static Employee.newSupervisor
 
 public class DispatcherIntegrationSpecification extends Specification {
 
@@ -16,8 +24,6 @@ public class DispatcherIntegrationSpecification extends Specification {
     private SelectEmployeeStrategy selectEmployeeStrategy
     private ExecutorService executorService
     private ScheduledExecutorService timeoutService
-
-    private Closeable socket = Stub(Closeable.class)
 
     def "employees are scheduled by priority and connection rejected if there are no more employees"() {
 

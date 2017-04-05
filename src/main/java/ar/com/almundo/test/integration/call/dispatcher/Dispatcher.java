@@ -1,4 +1,4 @@
-package ar.com.almundo;
+package ar.com.almundo.test.integration.call.dispatcher;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -10,12 +10,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import ar.com.almundo.test.integration.call.Employee;
 import net.jcip.annotations.ThreadSafe;
 
 @ThreadSafe
-class Dispatcher {
+public class Dispatcher {
 
-    private static final long TEN_SECONDS = 10L;
+    private static final long TEN_SECONDS_TIMEOUT = 10L;
 
     private final SelectEmployeeStrategy selectEmployeeStrategy;
     private final ExecutorService executorService;
@@ -52,7 +53,7 @@ class Dispatcher {
         this.timeoutService.schedule(() -> {
             restoreEmployeeOnTimeout(employee, future);
             return employee;
-        }, TEN_SECONDS, TimeUnit.SECONDS);
+        }, TEN_SECONDS_TIMEOUT, TimeUnit.SECONDS);
         return future;
     }
 
