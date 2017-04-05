@@ -43,7 +43,7 @@ public class LifecycleWebServer {
             }
 
             try {
-                dispatcher.dispatchCall(newCallOnSocketWithRequest(socket, req));
+                dispatcher.dispatchCall(new Call(socket));
             } catch (final RejectedExecutionException e) {
                 handleRejectedExecution(e);
             }

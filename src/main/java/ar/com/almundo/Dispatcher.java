@@ -2,7 +2,6 @@ package ar.com.almundo;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -24,30 +23,35 @@ class Dispatcher {
     private final static Logger logger = Logger.getLogger(Dispatcher.class.getName());
 
     public Dispatcher(final SelectEmployeeStrategy selectEmployeeStrategy, final ExecutorService executorService) {
+        this(selectEmployeeStrategy, executorService, Executors.newSingleThreadScheduledExecutor());
+    }
+
+    public Dispatcher(final SelectEmployeeStrategy selectEmployeeStrategy, final ExecutorService executorService,
+                      final ScheduledExecutorService timeoutService) {
         this.selectEmployeeStrategy = selectEmployeeStrategy;
         this.executorService = executorService;
-        this.timeoutService = Executors.newSingleThreadScheduledExecutor();
+        this.timeoutService = timeoutService;
     }
 
     public Optional<Future<Employee>> dispatchCall(final Call call) {
         final Optional<Employee> employee = selectEmployeeStrategy.getNextSelectableEmployee();
 
         if (employee.isPresent()) {
-            return Optional.of(handleCallToEmployee(call, employee.get()));
+            return Optional.of(handleCallToEmployee(employee.get().assignCall(call)));
         } else {
             handleNoEmployeesAvailable();
             return Optional.empty();
         }
     }
 
-    private Future<Employee> handleCallToEmployee(final Call call, final Employee employee) {
-        final Future future = this.executorService.submit((Callable<Void>) () -> {
-            dispatchCallToEmployee(call, employee);
-            return null;
+    private Future<Employee> handleCallToEmployee(final Employee employee) {
+        final Future<Employee> future = this.executorService.submit(() -> {
+            dispatchCallToEmployee(employee);
+            return employee;
         });
-        this.timeoutService.schedule((Callable<Void>) () -> {
+        this.timeoutService.schedule(() -> {
             restoreEmployeeOnTimeout(employee, future);
-            return null;
+            return employee;
         }, TEN_SECONDS, TimeUnit.SECONDS);
         return future;
     }
@@ -58,8 +62,7 @@ class Dispatcher {
     }
 
 
-    private void dispatchCallToEmployee(final Call call, final Employee employee) {
-        employee.assignCall(call);
+    private void dispatchCallToEmployee(final Employee employee) {
 
         logger.log(Level.INFO, Thread.currentThread().getName() + " => " + employee.toString());
 
@@ -72,7 +75,7 @@ class Dispatcher {
         logger.log(Level.INFO, "Employee stopping conversation with client...:(!");
 
         try {
-            call.getSocket().close();
+            employee.hangout();
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Could not close socket");
         } finally {

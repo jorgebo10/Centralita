@@ -1,5 +1,6 @@
 package ar.com.almundo;
 
+import java.io.IOException;
 import java.util.Objects;
 
 public class Employee implements Comparable<Employee> {
@@ -41,9 +42,16 @@ public class Employee implements Comparable<Employee> {
         return name;
     }
 
-    public void assignCall(final Call call) {
+    public Employee assignCall(final Call call) {
         Objects.requireNonNull(call);
         this.call = call;
+        return this;
+    }
+
+
+    public void hangout() throws IOException {
+        Objects.requireNonNull(call);
+        this.call.closeCall();
     }
 
     public EmployeeType getEmployeeType() {

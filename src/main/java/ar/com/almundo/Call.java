@@ -1,31 +1,31 @@
 package ar.com.almundo;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.util.Objects;
 
 import net.jcip.annotations.Immutable;
 
 @Immutable
-public class Call extends Socket {
+public final class Call {
     private final Socket socket;
-    private final Request request;
 
-    public static Call newCallOnSocketWithRequest(final Socket socket, final Request req) {
-        return new Call(socket, req);
-    }
-
-    private Call(final Socket socket, final Request request) {
+    public Call(final Socket socket) {
         this.socket = socket;
-        this.request = request;
     }
 
-    public Socket getSocket() {
-        //warning> Socket internal might be changed
-        return socket;
+    public void closeCall() throws IOException {
+        socket.close();
     }
 
-    public Request getRequest() {
-        return request;
+    public void send(final byte[] message) throws IOException {
+        socket.getOutputStream().write(message);
+    }
+
+    public byte[] receive() throws IOException {
+        byte[] buff = null;
+        socket.getInputStream().read(buff);
+        return  buff;
     }
 
     @Override
@@ -33,12 +33,11 @@ public class Call extends Socket {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Call call = (Call) o;
-        return Objects.equals(socket, call.socket)
-                && Objects.equals(request, call.request);
+        return Objects.equals(socket, call.socket);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(socket, request);
+        return Objects.hash(socket);
     }
 }
