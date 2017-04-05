@@ -25,19 +25,20 @@ class Dispatcher {
     private final ScheduledExecutorService timeoutService;
     private final static Logger logger = Logger.getLogger(Dispatcher.class.getName());
 
-    public Dispatcher(final Queue<Employee> queue, final ExecutorService executorService) {
-        this.availableEmployeesQueue = new PriorityBlockingQueue<>(queue);
+    public Dispatcher(final Queue<Employee> employees, final ExecutorService executorService) {
+        this.availableEmployeesQueue = new PriorityBlockingQueue<>(employees);
         this.executorService = executorService;
         this.timeoutService = Executors.newSingleThreadScheduledExecutor();
     }
 
-    public void dispatchCall(final Call call) {
+    public Optional<Future<Employee>> dispatchCall(final Call call) {
         final Optional<Employee> employee = getNextAvailableEmployee();
 
         if (employee.isPresent()) {
-            handleCallToEmployee(call, employee.get());
+            return Optional.of(handleCallToEmployee(call, employee.get()));
         } else {
             handleNoEmployeesAvailable();
+            return Optional.empty();
         }
     }
 
