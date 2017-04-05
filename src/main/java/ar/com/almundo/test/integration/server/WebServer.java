@@ -1,8 +1,6 @@
-package ar.com.almundo;
+package ar.com.almundo.test.integration.server;
 
-import static ar.com.almundo.Call.*;
-import static ar.com.almundo.Employee.*;
-import static ar.com.almundo.Request.*;
+import static ar.com.almundo.test.integration.call.Employee.*;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -14,12 +12,18 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class LifecycleWebServer {
-    private final static Logger logger = Logger.getLogger(LifecycleWebServer.class.getName());
+import ar.com.almundo.test.integration.call.Employee;
+import ar.com.almundo.test.integration.call.dispatcher.Call;
+import ar.com.almundo.test.integration.call.dispatcher.Dispatcher;
+import ar.com.almundo.test.integration.call.dispatcher.SelectEmployeeByPriorityStrategy;
+import ar.com.almundo.test.integration.call.dispatcher.SelectEmployeeStrategy;
+
+public class WebServer {
+    private final static Logger logger = Logger.getLogger(WebServer.class.getName());
     private final ExecutorService executorService;
     private final Dispatcher dispatcher;
 
-    public LifecycleWebServer(final Dispatcher dispatcher, final ExecutorService executorService) {
+    public WebServer(final Dispatcher dispatcher, final ExecutorService executorService) {
         this.dispatcher = dispatcher;
         this.executorService = executorService;
     }
@@ -36,14 +40,14 @@ public class LifecycleWebServer {
             final Socket socket = serverSocket.accept();
             logger.info("Connection accepted");
 
-            Request req  = newRequestFromSocket(socket);
+            Request req  = Request.newRequestFromSocket(socket);
             if (req.isShutdownRequest()) {
                 stop();
                 return;
             }
 
             try {
-                dispatcher.dispatchCall(newCallOnSocketWithRequest(socket, req));
+                dispatcher.dispatchCall(new Call(socket));
             } catch (final RejectedExecutionException e) {
                 handleRejectedExecution(e);
             }
@@ -67,8 +71,14 @@ public class LifecycleWebServer {
     }
 
     public static void main(final String[] args) throws IOException {
+        //let's limit the number of concurrent tasks for resource-management purposes,
+        // as in a server application that accepts requests from network
+        // clients and would otherwise be vulnerable to overload.
+        //TODO: pass thread limit as a parameter
         final ExecutorService executorService = Executors.newFixedThreadPool(10);
-        final Dispatcher dispatcher = new Dispatcher(getAvailableEmployees(), executorService);
-        new LifecycleWebServer(dispatcher, executorService).start();
+        final SelectEmployeeStrategy selectEmployeeStrategy =
+                new SelectEmployeeByPriorityStrategy(getAvailableEmployees());
+        final Dispatcher dispatcher = new Dispatcher(selectEmployeeStrategy, executorService);
+        new WebServer(dispatcher, executorService).start();
     }
 }

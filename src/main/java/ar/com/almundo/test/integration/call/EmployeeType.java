@@ -1,9 +1,9 @@
-package ar.com.almundo;
+package ar.com.almundo.test.integration.call;
 
 import net.jcip.annotations.Immutable;
 
 @Immutable
-public enum EmployeeType {
+enum EmployeeType {
     OPERATOR(1),
     SUPERVISOR(2),
     DIRECTOR(3);

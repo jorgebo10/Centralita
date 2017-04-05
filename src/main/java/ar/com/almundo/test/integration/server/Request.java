@@ -1,4 +1,4 @@
-package ar.com.almundo;
+package ar.com.almundo.test.integration.server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
