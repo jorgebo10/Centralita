@@ -1,4 +1,4 @@
-package ar.com.almundo.test.integration.call.dispatcher;
+package ar.com.almundo.callcenter.dispatcher;
 
 import java.io.IOException;
 import java.net.Socket;

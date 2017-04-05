@@ -1,4 +1,4 @@
-package ar.com.almundo.test.integration.call.dispatcher;
+package ar.com.almundo.callcenter.dispatcher;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import ar.com.almundo.test.integration.call.Employee;
+import ar.com.almundo.callcenter.Employee;
 import net.jcip.annotations.ThreadSafe;
 
 @ThreadSafe

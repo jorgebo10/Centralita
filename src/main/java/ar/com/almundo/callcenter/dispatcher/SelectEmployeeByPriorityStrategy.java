@@ -1,10 +1,10 @@
-package ar.com.almundo.test.integration.call.dispatcher;
+package ar.com.almundo.callcenter.dispatcher;
 
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.PriorityBlockingQueue;
 
-import ar.com.almundo.test.integration.call.Employee;
+import ar.com.almundo.callcenter.Employee;
 import net.jcip.annotations.ThreadSafe;
 
 @ThreadSafe

@@ -1,8 +1,8 @@
-package ar.com.almundo.test.integration.call.dispatcher;
+package ar.com.almundo.callcenter.dispatcher;
 
 import java.util.Optional;
 
-import ar.com.almundo.test.integration.call.Employee;
+import ar.com.almundo.callcenter.Employee;
 
 public interface SelectEmployeeStrategy {
 

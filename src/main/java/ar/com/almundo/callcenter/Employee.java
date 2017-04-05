@@ -1,11 +1,11 @@
-package ar.com.almundo.test.integration.call;
+package ar.com.almundo.callcenter;
 
 import java.io.IOException;
 import java.util.Objects;
 
-import ar.com.almundo.test.integration.call.dispatcher.Call;
-import ar.com.almundo.test.integration.utils.Talk;
-import ar.com.almundo.test.integration.utils.TimeScheduleTalk;
+import ar.com.almundo.callcenter.dispatcher.Call;
+import ar.com.almundo.callcenter.utils.Talk;
+import ar.com.almundo.callcenter.utils.TimeScheduleTalk;
 
 public class Employee implements Comparable<Employee> {
     private final Long id;

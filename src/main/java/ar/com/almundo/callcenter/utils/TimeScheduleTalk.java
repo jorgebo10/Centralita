@@ -1,4 +1,4 @@
-package ar.com.almundo.test.integration.utils;
+package ar.com.almundo.callcenter.utils;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

@@ -1,4 +1,4 @@
-package ar.com.almundo.test.integration.call;
+package ar.com.almundo.callcenter;
 
 import net.jcip.annotations.Immutable;
 

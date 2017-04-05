@@ -1,11 +1,10 @@
-package ar.com.almundo.test.integration
+package ar.com.almundo.callcenter
 
-import ar.com.almundo.test.integration.call.Employee
-import ar.com.almundo.test.integration.call.dispatcher.Call
-import ar.com.almundo.test.integration.call.dispatcher.Dispatcher
-import ar.com.almundo.test.integration.call.dispatcher.SelectEmployeeByPriorityStrategy
-import ar.com.almundo.test.integration.call.dispatcher.SelectEmployeeStrategy
-import ar.com.almundo.test.integration.server.NoDuplicatesPriorityQueue
+import ar.com.almundo.callcenter.dispatcher.Call
+import ar.com.almundo.callcenter.dispatcher.Dispatcher
+import ar.com.almundo.callcenter.dispatcher.SelectEmployeeByPriorityStrategy
+import ar.com.almundo.callcenter.dispatcher.SelectEmployeeStrategy
+import ar.com.almundo.callcenter.server.NoDuplicatesPriorityQueue
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
@@ -14,9 +13,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.ScheduledExecutorService
 
-import static Employee.newDirector
-import static Employee.newOperario
-import static Employee.newSupervisor
+import static Employee.*
 
 public class DispatcherIntegrationSpecification extends Specification {
 

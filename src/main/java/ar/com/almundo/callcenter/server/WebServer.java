@@ -1,6 +1,6 @@
-package ar.com.almundo.test.integration.server;
+package ar.com.almundo.callcenter.server;
 
-import static ar.com.almundo.test.integration.call.Employee.*;
+import static ar.com.almundo.callcenter.Employee.*;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -12,11 +12,11 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import ar.com.almundo.test.integration.call.Employee;
-import ar.com.almundo.test.integration.call.dispatcher.Call;
-import ar.com.almundo.test.integration.call.dispatcher.Dispatcher;
-import ar.com.almundo.test.integration.call.dispatcher.SelectEmployeeByPriorityStrategy;
-import ar.com.almundo.test.integration.call.dispatcher.SelectEmployeeStrategy;
+import ar.com.almundo.callcenter.Employee;
+import ar.com.almundo.callcenter.dispatcher.Call;
+import ar.com.almundo.callcenter.dispatcher.Dispatcher;
+import ar.com.almundo.callcenter.dispatcher.SelectEmployeeByPriorityStrategy;
+import ar.com.almundo.callcenter.dispatcher.SelectEmployeeStrategy;
 
 public class WebServer {
     private final static Logger logger = Logger.getLogger(WebServer.class.getName());
