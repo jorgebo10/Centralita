@@ -66,13 +66,7 @@ class Dispatcher {
 
         logger.log(Level.INFO, Thread.currentThread().getName() + " => " + employee.toString());
 
-        logger.log(Level.INFO, "Employee starting conversation with client...:)");
-
-        logger.log(Level.INFO, "Employee waiting for response from client...:|");
-
-        randomDelay(5, 11);
-
-        logger.log(Level.INFO, "Employee stopping conversation with client...:(!");
+        employee.startTalking();
 
         try {
             employee.hangout();
@@ -81,15 +75,6 @@ class Dispatcher {
         } finally {
             logger.log(Level.INFO, Thread.currentThread().getName() + " <= " + employee.toString());
             selectEmployeeStrategy.addSelectableEmployee(employee);
-        }
-    }
-
-    private void randomDelay(float min, float max) {
-        int random = (int) (max * Math.random() + min);
-        try {
-            Thread.sleep(random * 1000);
-        } catch (InterruptedException e) {
-            logger.log(Level.SEVERE, "Interrupted exception", e);
         }
     }
 

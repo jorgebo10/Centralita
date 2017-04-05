@@ -12,10 +12,13 @@ public class Employee implements Comparable<Employee> {
 
     private Call call;
 
+    private Talk talk;
+
     private Employee(final String name, final Long id, EmployeeType employeeType) {
         this.name = name;
         this.id = id;
         this.employeeType = employeeType;
+        talk = new TimeScheduleTalk(1, 5);
     }
 
     public static Employee newDirector(final String name, final Long id) {
@@ -28,6 +31,10 @@ public class Employee implements Comparable<Employee> {
 
     public static Employee newSupervisor(final String name, final Long id) {
         return new Employee(name, id, EmployeeType.SUPERVISOR);
+    }
+
+    public void setTalk(Talk talk) {
+        this.talk = talk;
     }
 
     public Call getCall() {
@@ -48,6 +55,9 @@ public class Employee implements Comparable<Employee> {
         return this;
     }
 
+    public void startTalking() {
+        talk.talk();
+    }
 
     public void hangout() throws IOException {
         Objects.requireNonNull(call);
